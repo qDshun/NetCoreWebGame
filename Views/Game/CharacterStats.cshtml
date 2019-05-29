@@ -1,0 +1,82 @@
+﻿@model gameModel.Character
+@inject gameModel.gameModel _context
+
+@{ 
+    <script>
+        avStats = false;
+    </script>
+    if (ViewBag.StatPoints > 0)
+    {
+    <script>
+        avStats = true;
+    </script>
+    }
+    
+}
+<body>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title"> @Model.Nickname </h5>
+            <p class="card-text">lvl @Model.CharacterInfo.Level</p>
+            <p class="card-text" style="margin-bottom:5px;">Exp: @Model.CharacterInfo.Exp /@((Model.CharacterInfo.Level) * 100)</p>
+            @if (ViewBag.infoIsFull)
+            {
+                <button id="statsButton" class="btn btn-secondary" onclick="buttonFullClick(false, avStats);"> Show stats</button>
+            }
+            else
+            {
+                <button id="statsButton" class="btn btn-secondary" onclick="buttonFullClick(true, avStats);"> Show stats</button>
+            }
+            <hr class="my-4" style="margin-top:5px!important;">
+            <p class="card-text"><b>HP: </b>@Model.CharacterState.Hp /@Model.CharacterState.MaxHp</p>
+            <p class="card-text"><b>MP: </b>@Model.CharacterState.Mp /@Model.CharacterState.MaxMp</p>
+            <p class="card-text"><b>Stamina: </b>@Model.CharacterState.Stamina /@Model.CharacterState.MaxStamina</p>
+
+            @if (ViewBag.infoIsFull)
+            {
+                <p id="damage"><b>Damage: </b>  </p>
+                <p id="armor"> <b>Armor: </b>   </p>
+                <p id="str"><b>STR: </b></p>
+                <p id="dex"><b>DEX: </b></p>
+                <p id="int"><b>INT: </b></p>
+                <p id="con"><b>CON: </b></p>
+                <p id="cha"><b>CHA: </b></p>
+            }
+            <hr class="my-4">
+            <div id="equipedMedia" class="media">
+                @if (Model.CharacterState.EquipedWeaponId != null)
+                {
+                    <img src="~/images/weapon.jpg" class="mr-3" alt="weapon" onclick="GetItemInfo(@Model.CharacterState.EquipedWeaponId);">
+                }
+                else
+                {
+                    <img src="~/images/UnequipedWeapon.jpg" class="mr-3" alt="weapon" onclick="GetItemInfo(@Model.CharacterState.EquipedWeaponId);">
+                }
+                @if (Model.CharacterState.EquipedOffhandId != null)
+                {
+                    <img src="~/images/offhand.jpg" class="mr-3" alt="offhand" onclick="GetItemInfo(@Model.CharacterState.EquipedOffhandId);">
+                }
+                else
+                {
+                    <img src="~/images/UnequipedOffhand.jpg" class="mr-3" alt="offhand" onclick="GetItemInfo(@Model.CharacterState.EquipedOffhandId);">
+                }
+                @if (Model.CharacterState.EquipedArmorId != null)
+                {
+                    <img src="~/images/armor.jpg" class="mr-3" alt="armor" onclick="GetItemInfo(@Model.CharacterState.EquipedArmorId);">
+                }
+                else
+                {
+                    <img src="~/images/UnequipedArmor.jpg" class="mr-3" alt="armor" onclick="GetItemInfo(@Model.CharacterState.EquipedArmorId);">
+                }
+                @if (Model.CharacterState.EquipedAmuletId != null)
+                {
+                    <img src="~/images/amulet.jpg" class="mr-3" alt="amulet" onclick="GetItemInfo(@Model.CharacterState.EquipedAmuletId);">
+                }
+                else
+                {
+                    <img src="~/images/UnequipedAmulet.jpg" class="mr-3" alt="amulet" onclick="GetItemInfo(@Model.CharacterState.EquipedAmuletId);">
+                }
+            </div>
+        </div>
+    </div>
+</body>

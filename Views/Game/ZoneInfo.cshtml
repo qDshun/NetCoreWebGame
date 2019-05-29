@@ -1,0 +1,48 @@
+﻿
+@model gameModel.Zone
+@inject gameModel.gameModel _context
+@{
+    string[] zoneTypes = { "plain", "forest", "desert", "mountain", "town" };
+    var existingMonsterIDs = from m in _context.ExistingMonsters
+                             where m.XPos == Model.XPos && m.YPos == Model.YPos
+                             select m;
+
+    var merchants = (from m in _context.Merchants
+                  where m.XPos == Model.XPos && m.YPos == Model.YPos
+                  select m).ToList();
+
+    int count = 0;
+
+    }
+    <body>
+        <div class="card" style="overflow-y:scroll;">
+            <div class="card-body">
+                <h5 class="card-title">Location: @zoneTypes[Model.Type] at X:@Model.XPos Y:@Model.YPos</h5>
+                <hr class="my-4">
+                @foreach (var monster in existingMonsterIDs)
+                {
+                    count++;
+                    var r = _context.Monsters.FirstOrDefault(m => m.MonsterId == monster.MonsterId);
+                    <p class="card-text"> You have met @r.MonsterName </p>
+                    <p class="card-text"> <b>HP: </b>@r.Hp <b>Attact: </b>@r.Damage <b>Armor: </b>@r.Armor </p>
+                    <button class="btn btn-secondary" onclick="StartBattle(@monster.ExistingMonsterId);"> Fight him</button>
+                    <hr class="my-4">
+                }
+                @if (existingMonsterIDs.Count() == 0)
+                {
+                    <p class="card-text"> Luckily (or not) there are no monsters here </p>
+                }
+
+                @if (@Model.Type == 4)
+                {
+                    <hr class="my-4">
+                    <p class="card-text"> You see a huge bridge. Guards take a close view to you. <br />"Do you want to pass in?" </p>
+                    <button class="btn btn-secondary" onclick="EnterTown(@Model.XPos, @Model.YPos, 0);"> Enter town </button>
+                }
+            </div>
+            <div class="card-footer">
+                <small class="text-muted">Last updated 3 mins ago</small>
+            </div>
+        </div>
+    </body>
+    

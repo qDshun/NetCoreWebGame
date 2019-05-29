@@ -1,0 +1,21 @@
+﻿
+@model NetCoreWebGame.Controllers.GameController.BattleObject
+
+<div id="battle" class="container">
+    <h2>Battle</h2>
+    <p> @Model.character.CharacterState.EquipedWeaponId vs @Model.monster.Monster.MonsterName</p>
+    <div id="logCard" class="card pre-scrollable">
+        <div id="logCardBody" class="card-body">
+            <h5 class="card-title"> Battle log </h5>
+        </div>
+    </div>
+    <button type="button" class="btn btn-secondary " data-toggle="dropdown" onclick="Turn(@Model.monster.ExistingMonsterId);">
+        Hit
+    </button>
+    <style>
+        #logCard{
+            height:400px;
+        }
+    </style>
+</div>
+

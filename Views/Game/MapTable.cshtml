@@ -1,0 +1,40 @@
+﻿
+@model List<List<gameModel.Zone>>
+@{ string[] zoneTypes = { "Meadow", "Forest", "Desert", "Mountain", "Town" };
+    string path(int type)
+    {
+        string result = "/images/" + zoneTypes[type] + ".jpg";
+        return result;
+    }
+}
+
+<body>
+    <h4> Map</h4>
+    <table>
+        <thead>
+
+        </thead>
+        <tbody>
+            <tr>
+                <td> x\y </td>
+                @foreach (var cell in Model[0])
+                {
+                    <td class="text-center"> @cell.YPos </td>
+                }
+            </tr>
+            @foreach (var row in Model)
+            {
+                <tr>
+                    <td class="text-center"> @row[0].XPos </td>
+                    @foreach (var cell in row)
+                    {
+                        <td class="map-cell" id="@cell.XPos @cell.YPos">
+                            <img class="text-center" src="@path(cell.Type)"
+                                 style="height:80px; width:80px; margin:0px; padding:0px; display:block;" />
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>

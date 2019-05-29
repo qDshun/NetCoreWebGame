@@ -1,0 +1,73 @@
+﻿@model NetCoreWebGame.Controllers.GameController.TownInfoObject
+@{ string tavernText =
+               "You enter the tavern through the thick, wooden door.\n" +
+               " The bartender is busy, but still manages to welcome you with a wink.\n"+
+               " Though judging by the smells of grilled and cooked food coming from the kitchen, it must be the food. " +
+               "You manage to find a seat and prepare for what will undoubtedbly be a great evening.";
+
+
+
+
+
+
+
+
+
+
+}
+<body>
+    <div class="card">
+        <div class="card-body">
+
+
+            @switch (@Model.subLocation)
+            {
+                case NetCoreWebGame.Controllers.GameController.TownInfoObject.SubLocation.Center:
+                    <h5 class="card-title"> You are standing in central square</h5>
+                    <p> Where would you go?</p>
+                    <hr class="my-4">
+                    <p> You see a few merchants selling their goods. Anything you could pay for.</p>
+                    <button class="btn btn-secondary" onclick="GetTownEvents(@Model.zone.XPos, @Model.zone.YPos, 1)"> Enter marketplace </button>
+                    <hr class="my-4">
+                    @foreach (var tavern in Model.merchants.Where(m => m.Type == "tavern"))
+                    {
+                        <p> You see @tavern.ShopName and hear laughter coming from there. Do you wish to go to the tavern?</p>
+                        <button class="btn btn-secondary" onclick="EnterTavern(@Model.zone.XPos, @Model.zone.YPos)"> Check it </button>
+                        <hr class="my-4">
+                    }
+                    <p> Safe places are for dummies! </p>
+                    <button class="btn btn-secondary" onclick="GetPlayerPosition();"> Leave the town </button>
+                    break;
+                case NetCoreWebGame.Controllers.GameController.TownInfoObject.SubLocation.Market:
+                    <h5 class="card-title"> You are standing between several markets</h5>
+                    <hr class="my-4">
+                    @foreach (var merchant in Model.merchants.Where(m => m.Type != "tavern"))
+                    {
+                        <p> You see sign of @merchant.ShopName, shop owned by @(merchant.Name + '.') Do you want to buy something? </p>
+                        <button class="btn btn-secondary"> Trade </button>
+                        <hr class="my-4">
+                    }
+                    <button class="btn btn-secondary" onclick="GetTownEvents(@Model.zone.XPos, @Model.zone.YPos, 0)"> Go back to center </button>
+                    <hr class="my-4">
+                    break;
+                case NetCoreWebGame.Controllers.GameController.TownInfoObject.SubLocation.Tavern:
+                    <h5 class="card-title"> You are in @Model.merchants.FirstOrDefault(m => m.Type == "tavern").Name`s tavern</h5>
+                    <p> @tavernText </p>
+                    <hr class="my-4">
+                    <p> There are smell of cooked food, coming from everywhere</p>
+                    <button class="btn btn-secondary"> Make order (@Model.merchants.FirstOrDefault(m => m.Type == "tavern").MealWorth gold)</button>
+                    <hr class="my-4">
+                    <p> You are very tired and need a few hours of sleep. Stay for night and get a rest </p>
+                    <button class="btn btn-secondary" onclick="SleepNight(@Model.merchants.FirstOrDefault(m => m.Type == "tavern").RoomRentWorth);"> Book a room (@Model.merchants.FirstOrDefault(m => m.Type == "tavern").RoomRentWorth gold)</button>
+                    <hr class="my-4">
+                    <p> Do you wish to look for anything else?</p>
+                    <button class="btn btn-secondary" onclick="GetTownEvents(@Model.zone.XPos, @Model.zone.YPos, 0)"> Go back to center </button>
+                    <hr class="my-4">
+                    break;
+                default:
+                    break;
+            }
+
+        </div>
+    </div>
+</body>

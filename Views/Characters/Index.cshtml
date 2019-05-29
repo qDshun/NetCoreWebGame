@@ -1,0 +1,52 @@
+﻿@model IEnumerable<gameModel.Character>
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Index";
+    var ctx = new gameModel.gameModel();
+    string current_user = HttpContextAccessor.HttpContext.User.Claims.FirstOrDefault().Value;
+    int current_user_id = ctx.Users.FirstOrDefault(i => i.Login == current_user).UserId;
+}
+
+<h2>Index</h2>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<a class="text-dark">Choose your character:</a>
+<div class="row">
+
+    <div class="col-4">
+        <div class="list-group" id="list-tab" role="tablist">
+            @foreach (var item in Model)
+            {
+                <a class="list-group-item list-group-item-action" id="list-@item.Nickname-list" data-toggle="list" href="#list-@item.Nickname" role="tab" aria-controls="@item.Nickname">
+                    @item.Nickname
+                </a>
+            }
+        </div>
+    </div>
+
+    <div class="col-8">
+        <div class="tab-content" id="nav-tabContent">
+            @foreach (var item in Model)
+            {
+                <div class="tab-pane fade" id="list-@item.Nickname" role="tabpanel" aria-labelledby="list-@item.Nickname-list">
+                    @item.Nickname <br />
+                    @item.Birthdate <br />
+                    @if (ctx.CharacterInfos.FirstOrDefault(i => i.CharacterId == item.CharacterId) != null)
+                    {
+                        @:Lvl @ctx.CharacterInfos.FirstOrDefault(i => i.CharacterId == item.CharacterId).Level <br />
+                    }
+                    else
+                    {
+                        @: Character hasn`t initialized yet <br />
+                    }
+                    <a asp-area="" asp-route-id="@item.CharacterId" asp-controller="Game" asp-action="Index">Enter as @item.Nickname </a>
+
+                </div>
+            }
+        </div>
+    </div>
+
+</div>

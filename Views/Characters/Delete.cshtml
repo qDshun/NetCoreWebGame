@@ -1,0 +1,29 @@
+﻿@model gameModel.Character
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Character</h4>
+    <hr />
+    <table class="table table-bordered table-dark">
+        <thead>
+            @for (int i=0; i<10; i++)
+            {
+            <tr>
+                @for (int j = 0; j < 10; j++)
+                {
+                    <td > @i @j </td>
+                }
+            </tr>
+            }
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+</div>

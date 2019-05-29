@@ -1,0 +1,14 @@
+﻿
+    <div class="container">
+        @if (ViewBag.TavernType == "sleep")
+        {
+            <h2>You are sleeping. Please, wait for map regen ( ~1 min )</h2>
+            <img src="~/images/NightAtTavern.jpg" class="img-fluid" />
+        }
+        else
+        {
+            <h2>Tavern</h2>
+            <img src="~/images/EnteringTavern.jpg" class="img-fluid" />
+        }
+    </div>
+

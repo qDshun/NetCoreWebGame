@@ -1,0 +1,16 @@
+﻿@model  List<gameModel.ExistingItem>
+
+    <div class="btn-group dropright" data-spy="scroll">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Inventory
+        </button>
+
+        <div class="dropdown-menu pre-scrollable">
+            @foreach (var itemInInventory in Model)
+            {
+                <a onclick="GetItemInfo(@itemInInventory.ExistingItemId);" data-toggle="tooltip" data-html="true" title="This is in your inventory" class="dropdown-item"> 
+            [@itemInInventory.ItemType.ItemTypeName @itemInInventory.Item.Name]
+                </a>
+            }
+        </div>
+    </div>

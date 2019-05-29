@@ -1,0 +1,17 @@
+﻿@model gameModel.Monster
+<body>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title"> @Model.MonsterName </h5>
+            <p><b>HP </b>@ViewBag.CurrentHP/@Model.Hp </p>
+            <hr class="my-4">
+            <p><b>Attack </b>@Model.Damage</p>
+            <p><b>Armor: </b>@Model.Armor</p>
+            <p><b>STR: </b>@Model.Str</p>
+            <p><b>DEX: </b>@Model.Dex</p>
+            <p><b>INT: </b>@Model.Int</p>
+            <p><b>CON: </b>@Model.Con</p>
+            <p><b>CHA: </b>@Model.Cha</p>
+        </div>
+    </div>
+</body>

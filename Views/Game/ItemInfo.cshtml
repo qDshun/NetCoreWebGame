@@ -1,0 +1,25 @@
+﻿@model gameModel.ExistingItem
+<body>
+    <div class="card">
+        <div class="card-body pre-scrollable">
+            <p><h5 class="card-title"> @Model.ItemType.ItemTypeName @Model.Item.Name  </h5> <text class="text-secondary">[@Model.Item.Type]</text></p>
+            @if (ViewBag.EquipedItemId == Model.ExistingItemId)
+            {
+                <button class="btn btn-secondary" onclick="UnEquip('@Model.Item.Type')"> Unequip </button>
+            }
+            else
+            {
+                <button class="btn btn-secondary" onclick="Equip(@Model.ExistingItemId, '@Model.Item.Type')"> Equip </button>
+            }
+            <p class="card-text"><b>Damage:</b> @(Model.Item.Damage + Model.ItemType.DamageModifier) </p>
+            <p class="card-text"><b>Armor:</b> @(Model.Item.Armor + Model.ItemType.ArmorModifier) </p>
+            <p class="card-text"><b>Str:</b> @(Model.Item.StrBonus + Model.ItemType.StrModifier) </p>
+            <p class="card-text"><b>Dex:</b> @(Model.Item.DexBonus + Model.ItemType.DexModifier) </p>
+            <p class="card-text"><b>Int:</b> @(Model.Item.IntBonus + Model.ItemType.IntModifier) </p>
+            <p class="card-text"><b>Con:</b> @(Model.Item.ConBonus + Model.ItemType.ConModifier) </p>
+            <p class="card-text"><b>Cha:</b> @(Model.Item.ChaBonus + Model.ItemType.ChaModifier) </p>
+            <p class="card-text"><b>Weight:</b> @(Model.Item.Weight + Model.ItemType.WeightModifier) </p>
+            <p class="card-text"><b>Worth:</b> @((Model.Item.Worth + Model.ItemType.AdditionalWorth) * Model.ItemType.WorthModifier) </p>
+        </div>
+    </div>
+</body>
