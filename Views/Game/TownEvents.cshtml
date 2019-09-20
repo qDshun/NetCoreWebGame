@@ -35,6 +35,9 @@
                         <button class="btn btn-secondary" onclick="EnterTavern(@Model.zone.XPos, @Model.zone.YPos)"> Check it </button>
                         <hr class="my-4">
                     }
+                    <p> You see a sign of a hospital. Do you want to get some healing?</p>
+                    <button class="btn btn-secondary" onclick="HealCharacter(100);"> Heal (free) </button>
+                    <hr class="my-4">
                     <p> Safe places are for dummies! </p>
                     <button class="btn btn-secondary" onclick="GetPlayerPosition();"> Leave the town </button>
                     break;
@@ -64,6 +67,7 @@
                     <button class="btn btn-secondary" onclick="GetTownEvents(@Model.zone.XPos, @Model.zone.YPos, 0)"> Go back to center </button>
                     <hr class="my-4">
                     break;
+
                 default:
                     break;
             }

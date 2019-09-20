@@ -4,47 +4,50 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - TheGame </title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" 
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" 
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
           crossorigin="anonymous">
 </head>
 
 <body>
     @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+    @inject gameModel.gameModel _context
 
     @{
         var query = HttpContextAccessor.HttpContext.User.Claims.FirstOrDefault();
     }
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Navbar</a>
+        <a class="navbar-brand" href="#"></a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Link</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Dropdown
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">Action</a>
-                        <a class="dropdown-item" href="#">Another action</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Something else here</a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" href="#">Disabled</a>
-                </li>
+                @*
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Dropdown
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="#">Action</a>
+                            <a class="dropdown-item" href="#">Another action</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Something else here</a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#">Disabled</a>
+                    </li>*@
             </ul>
-            <form class="form-inline my-2 my-lg-0">
+            <form class="form-inline pull-right my-lg-0">
                 @if (query != null)
                 {
                     <a class="text-muted">You are logged in as:</a>
@@ -60,20 +63,740 @@
     <div id="site" class="container-fluid">
         @RenderBody()
         <hr />
-        <footer>
-            <p>&copy; 2019 - qDshun, design by @@WormRiddenSkull</p>
-        </footer>
     </div>
+
+    <footer>
+        <p>&copy; 2019 - qDshun, design by @@WormRiddenSkull</p>
+    </footer>
     <style>
         .body-content {
-    width: 100%;
-    padding-right: 15px;
-    padding-left: 15px;
-    margin-right: auto;
-    margin-left: auto;
-    }
+            width: 100%;
+            padding-right: 15px;
+            padding-left: 15px;
+            margin-right: auto;
+            margin-left: auto;
+        }
     </style>
-    
+    <script>
+
+function RedrawMapTable(first_XPos, first_YPos)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("GetMapTable", "Game"))',
+        data: {
+            XPos: first_XPos,
+            YPos: first_YPos
+        },
+        contentType: 'json',
+
+        success: function (result)
+        {
+            $("#mapTableLoading").hide();
+            $("#myTable").html(result);
+        },
+
+        error: function ()
+        {
+            alert("wtf");
+        }
+    });
+}
+
+function RedrawMapTableForEditing(first_XPos, first_YPos)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("GetMapTable", "Game"))',
+        data: {
+            XPos: first_XPos,
+            YPos: first_YPos
+        },
+        contentType: 'json',
+
+        success: function (result)
+        {
+            $("#mapTableLoading").hide();
+            $("#myTable").html(result);
+            for (let i = first_XPos; i < first_XPos + 11; i++)
+                for (let j = first_YPos; j < first_YPos + 11; j++)
+                {
+                    document.getElementById(i + ' ' + j).addEventListener('click', function cellEditOnclick()
+                    {
+                        ChangeCellType(i, j);
+                        RedrawMapTableForEditing(first_XPos, first_YPos);
+                    });
+                }
+        },
+
+        error: function ()
+        {
+            alert("wtf");
+        }
+    });
+}
+
+function ChangeCellType(XPos, YPos)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("ClickMapCellOnMapRedactor", "Game"))',
+        data: {
+            xpos: XPos,
+            ypos: YPos
+        },
+        contentType: 'json',
+
+        success: function (result)
+        {
+            $("#mapTableLoading").hide();
+            RedrawMapTableForEditing(0, 0);
+        },
+
+        error: function ()
+        {
+            alert("wtf");
+        }
+    });
+}
+
+function GetZoneInfo(character_id, first_XPos, first_YPos)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("GetZoneInfo", "Game"))',
+        data: {
+            XPos: first_XPos,
+            YPos: first_YPos,
+            id: character_id
+        },
+        contentType: 'json',
+
+        success: function (result)
+        {
+            $("#zoneInfo").html(result);
+        },
+
+        error: function ()
+        {
+            alert("wtf");
+        }
+    });
+}
+
+function buttonFullClick(character_id, isFull, availibleStats)
+{
+    if (isFull && availibleStats)
+    {
+        GetCharacterInfo(character_id, true, true);
+    } else if (isFull)
+    {
+        GetCharacterInfo(character_id, true);
+        GetDmgAndArmor(character_id, false);
+    } else
+    {
+        GetCharacterInfo(character_id, false);
+    }
+    GetInventory(character_id,);
+}
+
+function GetCharacterInfo(character_id, isFull, availibleStats)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("GetCharacterInfo", "Game"))',
+        data: {
+            id: character_id,
+            full: isFull
+        },
+        contentType: 'json',
+        success: function (result)
+        {
+            $("#playerInfoCard").html(result);
+            if (isFull)
+            {
+                $("#inventory").hide();
+                $("#itemInfo").hide();
+                GetDmgAndArmor(character_id, availibleStats);
+            } else
+            {
+
+                $("#inventory").show();
+                $("#itemInfo").show();
+            }
+        },
+
+        error: function ()
+        {
+            alert("GetCharacterInfoError");
+        }
+    });
+}
+
+function SpendStatPoint(character_id, statId)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("SpendStatPoint", "Game"))',
+        data: {
+            id: character_id,
+            stat_id: statId
+        },
+        contentType: 'json',
+        success: function (result)
+        {
+            GetCharacterInfo(character_id,false);
+        },
+        error: function ()
+        {
+            alert("SpendStatPointError");
+        }
+    });
+}
+
+
+function GetInventory(character_id)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("GetInventory", "Game"))',
+        data: {
+            id: character_id
+        },
+        contentType: 'json',
+        success: function (result)
+        {
+            $("#inventory").html(result);
+        },
+
+        error: function ()
+        {
+            alert("wtf");
+        }
+    });
+}
+
+function HealCharacter(character_id, percents)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("HealCharacter", "Game"))',
+        data: {
+            id: character_id,
+            percentage: percents
+        },
+        contentType: 'json',
+        success: function (result)
+        {
+            GetCharacterInfo(character_id, false, false);
+        },
+
+        error: function ()
+        {
+            alert("wtf");
+        }
+    });
+}
+
+function GetItemInfo(character_id, exItemId)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("GetItemInfo", "Game"))',
+        data: {
+            id: character_id,
+            itemId: exItemId
+        },
+        contentType: 'json',
+        success: function (result)
+        {
+            $("#itemInfo").show();
+            $("#itemInfo").html(result);
+        },
+
+        error: function ()
+        {
+            alert("Nothing equipped in this slot");
+        }
+    });
+        }
+
+function SetMapInterface(character_id)
+{
+    $("#monsterInfoCard").hide();
+    $("#battle").hide();
+    $("#myTable").show();
+    $("#btnCentrate").show();
+    GetCharacterInfo(character_id, false);
+    $("#inventory").show();
+    $("#itemInfo").show();
+    $("#zoneInfo").show();
+    GetPlayerPosition(character_id);
+}
+
+function GetPlayerPosition(character_id)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("GetPlayerPosition", "Game"))',
+        data: {
+            id: character_id
+        },
+        contentType: 'json',
+        success: function (result)
+        {
+            var x = result[0];
+            var y = result[1];
+            GetZoneInfo(character_id, x, y);
+            RedrawMapTable(x - 5, y - 5);
+            GetCharacterInfo(character_id, false);
+            GetInventory(character_id);
+        },
+        error: function ()
+        {
+            alert("wtf");
+        }
+    });
+    $(document).ajaxStop(function() {
+            InitPlayer(character_id);
+            $(this).unbind("ajaxStop");
+    });
+}
+
+function ChangePlayerPosition(character_id, x, y)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("ChangePlayerPosition", "Game"))',
+        data: {
+            xpos: x,
+            ypos: y,
+            id: character_id
+        },
+        contentType: 'json',
+        success: function (result)
+        {
+            if (result == false)
+                alert('Something went wrong');
+        },
+        error: function ()
+        {
+            alert("error");
+        }
+    });
+}
+
+function InitPlayer(character_id)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("GetPlayerPosition", "Game"))',
+        data: {
+            id: character_id
+        },
+        contentType: 'json',
+        success: function (result)
+        {
+            var x = result[0];
+            var y = result[1];
+            movePlayer(character_id, x, y);
+            $("#monsterInfoCard").hide();
+            return result;
+        },
+        error: function ()
+        {
+            alert("wtf");
+        }
+    });
+}
+
+function movePlayer(character_id, XPos, YPos)
+{
+    $.each(document.getElementsByClassName("map-cell"), function (index, value)
+    {
+        $(value).css('background-color', 'transparent');
+        $(value).replaceWith($(value).clone());
+    });
+    var buffer = document.getElementById(XPos + ' ' + YPos).innerHTML;
+    document.getElementById(XPos + ' ' + YPos).innerHTML = '<img class="text-center" src="/images/Player.jpg" style="height:80px; width:80px; margin:0px; padding:0px; display:block;" />'
+    //IT works
+    for (let i = XPos - 1; i < XPos + 2; i++)
+        for (let j = YPos - 1; j < YPos + 2; j++)
+            if (!(i == XPos && j == YPos))
+            {
+                if (document.getElementById(i + ' ' + j) != null && document.getElementById(i + ' ' + j).innerHTML.indexOf('Mountain') == -1)
+                {
+                    $(document.getElementById(i + ' ' + j)).css('background-color', 'green');
+                    document.getElementById(i + ' ' + j).addEventListener('click', function cellOnclick()
+                    {
+                        ChangePlayerPosition(character_id, i, j);
+                        movePlayer(character_id, i, j);
+                        GetZoneInfo(character_id, i, j);
+                        GetCharacterInfo(character_id, false);
+                        document.getElementById(XPos + ' ' + YPos).innerHTML = buffer;
+                        GetInventory(character_id);
+                    });
+                }
+
+            }
+}
+
+
+function StartBattle(character_id, monsterId)
+{
+    var id = character_id;
+    window.location.href = '@Url.Action("StartBattle", "Game")/?id=' + id + '&monster_id=' + monsterId;
+        }
+
+        function ReturnFromBattle(character_id)
+{
+            window.location.href = '@Url.Action("Index", "Game")/?id=' + character_id;
+}
+
+    function InitializeBattleInterface(id, monsterId)
+    {
+        GetCharacterInfo(id, true, 0);
+        GetDmgAndArmor(id, false);
+        GetMonsterInfo(monsterId);
+    }
+
+function WinBattle(character_id, monsterId)
+{
+    $("#btnHit").hide();
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("WinBattle", "Game"))',
+        data: {
+            id: character_id,
+            monster_id: monsterId
+        },
+        contentType: 'json',
+        success: function (result)
+        {
+            $(".alert").show();
+            $(".alert").append('<p class="mb-0"> Exp gained: ' + result.exp + '</p>');
+            if (result.itemName != null)
+                $(".alert").append('<p class="mb-0"> Oh. Here`s an item: ' + result.itemName + '</p>');
+            $(".alert").append('<button class="btn btn-secondary"  onclick="ReturnFromBattle(' + character_id + ')"> Back to map </button>');
+        },
+
+        error: function ()
+        {
+            alert("BattleError");
+        }
+    });
+}
+
+function CheckMonsterIfDead(character_id, monsterId)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("isMonsterDead", "Game"))',
+        data: {
+            id: character_id,
+            monster_id: monsterId
+        },
+        contentType: 'json',
+        success: function (result)
+        {
+            if (result)
+                WinBattle(character_id, monsterId);
+        },
+
+        error: function ()
+        {
+            alert("BattleError");
+        }
+    });
+}
+
+function GetMonsterInfo(monsterId)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("GetMonsterInfo", "Game"))',
+        data: {
+            existing_monster_id: monsterId
+        },
+        contentType: 'json',
+        success: function (result)
+        {
+            $("#monsterInfoCard").html(result);
+        },
+        error: function ()
+        {
+            alert("wtf");
+        }
+    });
+}
+
+function GetDmgAndArmor(character_id, availibleStats)
+{
+    r = Array(7);
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("GetCalculatedDmgAndArmor", "Game"))',
+        data: {
+            id: character_id
+        },
+        contentType: 'json',
+        success: function (result)
+        {
+            r = result;
+            document.getElementById("damage").innerHTML = '<b>Damage: </b> ' + r[0];
+            document.getElementById("armor").innerHTML = '<b>Armor: </b>' + r[1];
+            if (availibleStats)
+            {
+                document.getElementById("str").innerHTML = '<b>STR: </b>' + r[2] + '<b onclick="SpendStatPoint(1);"> (+) </b>';
+                document.getElementById("dex").innerHTML = '<b>DEX: </b>' + r[3] + '<b onclick="SpendStatPoint(2);"> (+) </b>';
+                document.getElementById("int").innerHTML = '<b>INT: </b>' + r[4] + '<b onclick="SpendStatPoint(3);"> (+) </b>';
+                document.getElementById("con").innerHTML = '<b>CON: </b>' + r[5] + '<b onclick="SpendStatPoint(4);"> (+) </b>';
+                document.getElementById("cha").innerHTML = '<b>CHA: </b>' + r[6] + '<b onclick="SpendStatPoint(5);"> (+) </b>';
+            } else
+            {
+                document.getElementById("str").innerHTML = '<b>STR: </b>' + r[2];
+                document.getElementById("dex").innerHTML = '<b>DEX: </b>' + r[3];
+                document.getElementById("int").innerHTML = '<b>INT: </b>' + r[4];
+                document.getElementById("con").innerHTML = '<b>CON: </b>' + r[5];
+                document.getElementById("cha").innerHTML = '<b>CHA: </b>' + r[6];
+            }
+        },
+        error: function ()
+        {
+            alert("wtf");
+        }
+    });
+    return r;
+}
+
+function EnterTown(character_id, xpos, ypos)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("EnterTown", "Game"))',
+        data: {
+            id: character_id,
+            XPos: xpos,
+            YPos: ypos
+        },
+        contentType: 'json',
+        success: function (result)
+        {
+            $("#myTable").html(result);
+            $("#btnCentrate").hide();
+            GetTownEvents(xpos, ypos);
+        },
+        error: function ()
+        {
+            alert("wEnterTownError");
+        }
+    });
+}
+
+function EnterTavern(character_id, xpos, ypos)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("EnterTavern", "Game"))',
+        data: {
+            id: character_id,
+            XPos: xpos,
+            YPos: ypos
+        },
+        contentType: 'json',
+        success: function (result)
+        {
+            $("#myTable").html(result);
+            $("#btnCentrate").hide();
+            GetTownEvents(character_id, xpos, ypos, 2);
+        },
+        error: function ()
+        {
+            alert("wEnterTownError");
+        }
+    });
+}
+
+function GetTownEvents(character_id, xpos, ypos, eventType)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("GetTownEvents", "Game"))',
+        data: {
+            id: character_id,
+            XPos: xpos,
+            YPos: ypos,
+            type: eventType
+        },
+        contentType: 'json',
+        success: function (result)
+        {
+            $("#zoneInfo").html(result);
+        },
+        error: function ()
+        {
+            alert("GetTownEventsError");
+        }
+    });
+}
+
+function Turn(character_id, monster_id)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("Turn", "Game"))',
+        data: {
+            id: character_id,
+            existingMontersId: monster_id
+        },
+        contentType: 'json',
+        success: function (result)
+        {
+
+            GetMonsterInfo(monster_id);
+            GetCharacterInfo(character_id, true);
+            GetDmgAndArmor(character_id, false);
+            CheckMonsterIfDead(character_id, monster_id);
+            $.each(result, function (index, value)
+            {
+                var currentTime = new Date();
+                document.getElementById("logCardBody").innerHTML += '<p>' + [currentTime.getHours(), currentTime.getMinutes(), currentTime.getSeconds()].join(':') + ': ' + value + '</p>';
+
+            });
+        },
+        error: function ()
+        {
+            alert("DealDamageError");
+        }
+    });
+}
+
+function Equip(character_id, exItemId, loottype)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("Equip", "Game"))',
+        data: {
+            id: character_id,
+            existingItemId: exItemId,
+            type: loottype
+        },
+        contentType: 'json',
+        success: function ()
+        {
+            refreshStatsInterface(false);
+
+        },
+        error: function ()
+        {
+            alert("wtf");
+        }
+    });
+}
+
+function UnEquip(character_id, loottype)
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("UnEquip", "Game"))',
+        data: {
+            id: character_id,
+            type: loottype
+        },
+        contentType: 'json',
+        success: function ()
+        {
+            refreshStatsInterface(false);
+        },
+        error: function ()
+        {
+            alert("wtf");
+        }
+    });
+}
+
+function WakeUpInTavern()
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("EnterTavern", "Game"))',
+        contentType: 'json',
+        success: function (result)
+        {
+            $("#myTable").html(result);
+            $("#right").show();
+        },
+        error: function ()
+        {
+            alert("wEnterTownError");
+        }
+    });
+}
+
+function RefillMapWithMonster()
+{
+    $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("RefillMapWithMonsters", "Game"))',
+        contentType: 'json',
+        success: function (result)
+        {
+            WakeUpInTavern();
+            alert("New day becomes and new monsters are waiting for you.");
+        },
+        error: function ()
+        {
+            alert("RefillMapWithMonsterError");
+        }
+    });
+
+}
+
+function SleepNight(payment)
+{
+    if (confirm('Are you sure to pay ' + payment + ' gold to skip night?') && SpendMoney(payment))
+    {
+        $.ajax({
+            type: 'GET',
+            url: '@Html.Raw(@Url.Action("SleepNight", "Game"))',
+            contentType: 'json',
+            success: function (result)
+            {
+                $("#right").hide();
+                $("#myTable").html(result);
+                RefillMapWithMonster();
+            },
+            error: function ()
+            {
+                alert("Not enought money. Come back when you earn more.");
+            }
+        });
+    } else
+    {
+        alert("Not enought money. Come back when you earn more.");
+    }
+}
+
+function SpendMoney(character_id, payment)
+{
+    return $.ajax({
+        type: 'GET',
+        url: '@Html.Raw(@Url.Action("SpendMoney", "Game"))',
+        async: false,
+        data: {
+            id: character_id,
+            amount: payment
+        },
+        contentType: 'json'
+    }).responseJSON;
+}
+
+function refreshStatsInterface(full)
+{
+    GetCharacterInfo(character_id, full);
+    GetInventory(character_id);
+}
+    </script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>

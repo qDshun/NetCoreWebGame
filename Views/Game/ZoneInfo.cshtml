@@ -24,8 +24,8 @@
                     count++;
                     var r = _context.Monsters.FirstOrDefault(m => m.MonsterId == monster.MonsterId);
                     <p class="card-text"> You have met @r.MonsterName </p>
-                    <p class="card-text"> <b>HP: </b>@r.Hp <b>Attact: </b>@r.Damage <b>Armor: </b>@r.Armor </p>
-                    <button class="btn btn-secondary" onclick="StartBattle(@monster.ExistingMonsterId);"> Fight him</button>
+                    <p class="card-text"> <b>HP: </b>@(r.Hp - monster.Damaged)/@r.Hp <b>Attact: </b>@r.Damage <b>Armor: </b>@r.Armor </p>
+                    <button class="btn btn-secondary"  onclick="StartBattle(@ViewBag.CharacterID, @monster.ExistingMonsterId);"> Fight him</button>
                     <hr class="my-4">
                 }
                 @if (existingMonsterIDs.Count() == 0)

@@ -65,7 +65,7 @@ namespace testcore
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Game}/{action=Index}/{id=1}");
+                    template: "{controller=Characters}/{action=Index}/");
             });
         }
     }

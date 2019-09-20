@@ -1,21 +1,67 @@
 ﻿
 @model NetCoreWebGame.Controllers.GameController.BattleObject
 
-<div id="battle" class="container">
+<div id="battle" class="container" >
     <h2>Battle</h2>
-    <p> @Model.character.CharacterState.EquipedWeaponId vs @Model.monster.Monster.MonsterName</p>
-    <div id="logCard" class="card pre-scrollable">
-        <div id="logCardBody" class="card-body">
-            <h5 class="card-title"> Battle log </h5>
+    <p> @Model.character.Nickname vs @Model.monster.Monster.MonsterName</p>
+
+    <div id="left" class="container">
+        <div id="playerInfoCard" class="card">
+            <div class="card-body">
+            </div>
         </div>
     </div>
-    <button type="button" class="btn btn-secondary " data-toggle="dropdown" onclick="Turn(@Model.monster.ExistingMonsterId);">
+
+    <div id="main" class="container">
+
+        <div class="alert alert-success alertWinBattle fade show" role="alert">
+            <h4 class="alert-heading">Well done!</h4>
+            <p>Aww yeah, all ememies are dead now. Here are what you`ve earned</p>
+            <hr>
+        </div>
+
+        <div id="logCard" class="card pre-scrollable">
+            <div id="logCardBody" class="card-body">
+                <h5 class="card-title"> Battle log </h5>
+            </div>
+        </div>
+    </div>
+
+    <div id="right" class="container">
+        <div id="monsterInfoCard" class="card">
+            <div class="card-body">
+            </div>
+        </div>
+
+    </div>
+    <button type="button" class="btn btn-secondary" id="btnHit" onclick="Turn(@Model.character.CharacterId, @Model.monster.ExistingMonsterId);">
         Hit
     </button>
     <style>
-        #logCard{
-            height:400px;
+        #logCard {
+            height: 400px;
+        }
+
+        #left {
+            position: fixed;
+            top: 70px;
+            left: 5px;
+            width: 350px;
+        }
+
+        #right {
+            position: fixed;
+            top: 70px;
+            right: 5px;
+            width: 400px;
         }
     </style>
-</div>
 
+</div>
+<script >
+    document.addEventListener('DOMContentLoaded', function ()
+    {
+        $('.alert').hide();
+        InitializeBattleInterface(@Model.character.CharacterId, @Model.monster.ExistingMonsterId);
+}, false);
+</script>

@@ -86,10 +86,69 @@ namespace NetCoreWebGame.Controllers
             _currentCharacter = _context.Characters.FirstOrDefault(c => c.CharacterId == id);
             _currentCharacterInfo = _context.CharacterInfos.FirstOrDefault(c => c.CharacterId == id);
             _currentCharacterState = _context.CharacterStates.FirstOrDefault(c => c.CharacterId == id);
-
+            InitCharacter(id);
+            ViewBag.currentCharacterId = id;
             return View("Map", id);
         }
+        public bool InitCharacter(int? id)
+        {
+            var curent_character_info = _context.CharacterInfos.FirstOrDefault(i => i.CharacterId == id);
+            var curent_character_state = _context.CharacterStates.FirstOrDefault(i => i.CharacterId == id);
+            if (curent_character_info == null)
+            {
+                CharacterInfo newInfo = new CharacterInfo
+                {
+                    CharacterId = (int)id,
+                    Cha = 1,
+                    Con = 1,
+                    Str = 1,
+                    Dex = 1,
+                    Int = 1,
+                    Exp = 0,
+                    Level = 1,
+                    Gold = 0,
+                    StatPoints = 0,
+                    Race = "Human",
+                    Sex = "male"
+                };
+                _context.CharacterInfos.AddAsync(newInfo);
+                _context.SaveChangesAsync();
+            }
+            if (curent_character_state == null)
+            {
+                curent_character_info = _context.CharacterInfos.FirstOrDefault(i => i.CharacterId == id);
+                CharacterState newState = new CharacterState
+                {
+                    CharacterId = (int)id,
+                    MaxHp = curent_character_info.Con * 10,
+                    MaxMp = curent_character_info.Int * 10,
+                    MaxStamina = curent_character_info.Dex * 5 + curent_character_info.Str * 5 + curent_character_info.Con * 5,
+                    XPos = 5,
+                    YPos = 5
+                };
+                newState.Hp = newState.MaxHp;
+                newState.Mp = newState.MaxMp;
+                newState.Stamina = newState.MaxStamina;
+                int existing_item_id;
+                if (_context.ExistingItems.Count() != 0)
+                    existing_item_id = _context.ExistingItems.Max(i => i.ExistingItemId) + 1;
+                else
+                    existing_item_id = 1;
+                var baseWeapon = new ExistingItem
+                {
 
+                    ExistingItemId = existing_item_id,
+                    CharacterId = id,
+                    ItemId = 2,
+                    ItemTypeId = 2
+                };
+                _context.ExistingItems.AddAsync(baseWeapon);
+                _context.CharacterStates.AddAsync(newState);
+                _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
         public IActionResult Map()
         {
             return View();
@@ -196,6 +255,13 @@ namespace NetCoreWebGame.Controllers
             return GetCharacterInfo(id, true);
         }
 
+        public void HealCharacter(int id, int percentage)
+        {
+            _context.CharacterStates.FirstOrDefault(c => c.CharacterId == id).Hp += _context.CharacterStates.FirstOrDefault(c => c.CharacterId == id).MaxHp * percentage / 100;
+            if (_context.CharacterStates.FirstOrDefault(c => c.CharacterId == id).Hp > _context.CharacterStates.FirstOrDefault(c => c.CharacterId == id).MaxHp)
+                _context.CharacterStates.FirstOrDefault(c => c.CharacterId == id).Hp = _context.CharacterStates.FirstOrDefault(c => c.CharacterId == id).MaxHp;
+            _context.SaveChangesAsync();
+        }
         //start of batlle logic
         #region battle 
 
@@ -318,7 +384,7 @@ namespace NetCoreWebGame.Controllers
             var character = _context.Characters.Include(c => c.CharacterState).FirstOrDefault(c => c.CharacterId == id);
             var monster = _context.ExistingMonsters.Include(m => m.Monster).FirstOrDefault(m => m.ExistingMonsterId == monster_id);
             BattleObject battleObject = new BattleObject(character, monster);
-            return PartialView("Battle", battleObject);
+            return View("Battle", battleObject);
         }
 
         public JsonResult isMonsterDead(int id, int monster_id)
@@ -326,17 +392,25 @@ namespace NetCoreWebGame.Controllers
             if (_context.ExistingMonsters.Include(m => m.Monster).FirstOrDefault(m => m.ExistingMonsterId == monster_id).Monster.Hp < 
                 _context.ExistingMonsters.Include(m => m.Monster).FirstOrDefault(m => m.ExistingMonsterId == monster_id).Damaged)
             {
+                _context.Remove(_context.ExistingMonsters.FirstOrDefault(m => m.ExistingMonsterId == monster_id));
                 return Json(true);
             }
             return Json(false);
         }
-        public IActionResult WinBattle(int id, int monster_id)
+        public JsonResult WinBattle(int id, int monster_id)
         {
             var monsterid = _context.ExistingMonsters.FirstOrDefault(m => m.ExistingMonsterId == monster_id).MonsterId;
             var character = _context.Characters.Include(c => c.CharacterInfo).Include(c => c.CharacterState).FirstOrDefault(c => c.CharacterId == id);
             var exp = GainExp(id, monster_id);
-            GetLoot(id, exp);
-            return GetCharacterInfo(id, false);
+            var loot = GetLoot(id, exp);
+            string itemName = null;
+            if (loot != -1)
+            {
+                ExistingItem lootItem = _context.ExistingItems.FirstOrDefault(i => i.ExistingItemId == loot);
+                itemName = lootItem.ItemType.ItemTypeName + ' ' + lootItem.Item.Name;
+
+            }
+            return Json(new {exp, itemName}); 
         }
 
         public int GainExp(int id, int monster_id)
@@ -358,9 +432,10 @@ namespace NetCoreWebGame.Controllers
             return gainedExp;
         }
 
-        public void GetLoot(int id, int exp)
+        public int GetLoot(int id, int exp)
         {
             var character = _context.Characters.Include(c => c.CharacterInfo).Include(c => c.CharacterState).FirstOrDefault(c => c.CharacterId == id);
+            int result = -1; //loot id, -1 if not exists
             // from exp%100 - 1 to exp%100 + 1
             // generation of loot start
             int lower = exp / 100 - 1;
@@ -401,11 +476,13 @@ namespace NetCoreWebGame.Controllers
                     ItemTypeId = lootType.ItemTypeId,
                     CharacterId = id
                 };
-
                 //generation of loot end
                 _context.ExistingItems.Add(loot);
+                if (loot != null)
+                    result = loot.ExistingItemId;
             }
             _context.SaveChangesAsync();
+            return result;
         }
 
         public void RefillMapWithMonsters()
@@ -656,6 +733,7 @@ namespace NetCoreWebGame.Controllers
         //TODO: Боевая система
         //TODO: Действие мобов
         //TODO: Дизайн
+            //TODO: Битву в отдельную страницу, пофиксит гору багов
         //TODO: Прокачка (награды за левелап)
         //TODO: Генерацию мобов
         //TODO: Инициализация/создание персонажей
@@ -675,5 +753,6 @@ namespace NetCoreWebGame.Controllers
         //TODO: Заполнить базы не тестовыми данными
         //TODO: Возможно, типы урона
         //TODO: Scaling from attr
+        
     }
 }

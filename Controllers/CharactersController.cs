@@ -140,6 +140,7 @@ namespace testcore
 
             return View(character);
         }
+      
         public IActionResult Delete()
         {
             return View();
@@ -160,6 +161,10 @@ namespace testcore
         {
             if (ModelState.IsValid)
             {
+                string username = HttpContext.User.Claims.FirstOrDefault().Value;
+                character.UserId = _context.Users.FirstOrDefaultAsync(u => u.Login == username).Result.UserId;
+                character.CharacterId = _context.Characters.Max(c => c.CharacterId) + 1;
+                character.Birthdate = DateTime.Now;
                 _context.Add(character);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));

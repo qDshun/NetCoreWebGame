@@ -5,11 +5,11 @@
             <p><h5 class="card-title"> @Model.ItemType.ItemTypeName @Model.Item.Name  </h5> <text class="text-secondary">[@Model.Item.Type]</text></p>
             @if (ViewBag.EquipedItemId == Model.ExistingItemId)
             {
-                <button class="btn btn-secondary" onclick="UnEquip('@Model.Item.Type')"> Unequip </button>
+                <button class="btn btn-secondary" onclick="UnEquip(@Model.CharacterId, '@Model.Item.Type')"> Unequip </button>
             }
             else
             {
-                <button class="btn btn-secondary" onclick="Equip(@Model.ExistingItemId, '@Model.Item.Type')"> Equip </button>
+                <button class="btn btn-secondary" onclick="Equip(@Model.CharacterId, @Model.ExistingItemId, '@Model.Item.Type')"> Equip </button>
             }
             <p class="card-text"><b>Damage:</b> @(Model.Item.Damage + Model.ItemType.DamageModifier) </p>
             <p class="card-text"><b>Armor:</b> @(Model.Item.Armor + Model.ItemType.ArmorModifier) </p>
